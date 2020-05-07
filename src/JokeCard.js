@@ -7,7 +7,6 @@ import {
 	CardActions,
 	Typography,
 } from "@material-ui/core";
-import "./App.css";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles({

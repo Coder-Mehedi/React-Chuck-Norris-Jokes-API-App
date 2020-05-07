@@ -8,7 +8,6 @@ import {
 	Tab,
 	Tabs,
 } from "@material-ui/core";
-import "./App.css";
 
 import JokeCard from "./JokeCard";
 
