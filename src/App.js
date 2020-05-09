@@ -22,6 +22,10 @@ const useStyles = makeStyles({
 		display: "flex",
 		alignItems: "center",
 		justifyContent: "center",
+		"& > *": {
+			margin: 20,
+			width: "25ch",
+		},
 	},
 });
 
