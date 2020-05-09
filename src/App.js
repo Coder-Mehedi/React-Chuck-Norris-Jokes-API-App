@@ -10,9 +10,20 @@ import {
 	Typography,
 	Tab,
 	Tabs,
+	TextField,
+	makeStyles,
+	Button,
 } from "@material-ui/core";
 
 import JokeCard from "./JokeCard";
+
+const useStyles = makeStyles({
+	form: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+});
 
 function Spinner() {
 	return (
@@ -28,6 +39,8 @@ function App() {
 		getCategories();
 	}, []);
 
+	const classes = useStyles();
+
 	const [jokes, setJokes] = useState([]);
 	const [categories, setCategories] = useState([]);
 	const [filterCategories, setFilterCategories] = useState([]);
@@ -35,6 +48,9 @@ function App() {
 	const [likedJokes, setLikedJokes] = useState([]);
 	const [currentTab, setCurrentTab] = useState(0);
 	const [loading, setLoading] = useState(false);
+
+	const [firstName, setFirstName] = useState("Chuck");
+	const [lastName, setLastName] = useState("Norris");
 
 	useEffect(() => {
 		const bottomJokeEl = document.getElementById(
@@ -44,11 +60,15 @@ function App() {
 	}, [jokesToShow]);
 
 	const getJokes = () => {
-		fetch("https://api.icndb.com/jokes")
+		setLoading(true);
+		fetch(
+			`https://api.icndb.com/jokes?firstName=${firstName}&lastName=${lastName}`
+		)
 			.then((res) => res.json())
 			.then((res) => {
 				setJokes(res.value);
 				setJokesToShow(res.value.slice(0, 10));
+				setLoading(false);
 			})
 			.catch((err) => console.log(err));
 	};
@@ -119,6 +139,12 @@ function App() {
 		return false;
 	};
 
+	const changeName = (e) => {
+		e.preventDefault();
+		if (firstName === "" || lastName === "") return;
+		getJokes();
+	};
+
 	return (
 		<div className="App">
 			<CssBaseline />
@@ -146,6 +172,23 @@ function App() {
 				</AppBar>
 
 				<div role="tabpanel" hidden={currentTab !== 0}>
+					<form onSubmit={changeName} noValidate className={classes.form}>
+						<TextField
+							id="firstName"
+							label="First Name"
+							value={firstName}
+							onChange={(e) => setFirstName(e.target.value)}
+						/>
+						<TextField
+							id="lastName"
+							label="Last Name"
+							value={lastName}
+							onChange={(e) => setLastName(e.target.value)}
+						/>
+						<Button type="submit" variant="contained" color="primary">
+							Submit
+						</Button>
+					</form>
 					{/* Category filters */}
 					{categories.map((category) => (
 						<FormControlLabel
