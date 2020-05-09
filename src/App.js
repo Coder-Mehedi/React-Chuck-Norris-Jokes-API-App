@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
 	AppBar,
+	Badge,
 	CssBaseline,
 	Container,
 	CircularProgress,
+	Checkbox,
+	FormControlLabel,
 	Typography,
 	Tab,
 	Tabs,
@@ -27,6 +30,7 @@ function App() {
 
 	const [jokes, setJokes] = useState([]);
 	const [categories, setCategories] = useState([]);
+	const [filterCategories, setFilterCategories] = useState([]);
 	const [jokesToShow, setJokesToShow] = useState([]);
 	const [likedJokes, setLikedJokes] = useState([]);
 	const [currentTab, setCurrentTab] = useState(0);
@@ -54,6 +58,7 @@ function App() {
 			.then((res) => res.json())
 			.then((res) => {
 				setCategories(res.value);
+				setFilterCategories(res.value);
 			})
 			.catch((err) => console.log(err));
 	};
@@ -95,6 +100,25 @@ function App() {
 		setLikedJokes(newLikedJokes);
 	};
 
+	const togleCategory = (e) => {
+		const category = e.target.name;
+		if (filterCategories.includes(category)) {
+			const filterCategoriesCopy = [...filterCategories];
+			const categoryIndex = filterCategoriesCopy.indexOf(category);
+			filterCategoriesCopy.splice(categoryIndex, 1);
+			setFilterCategories(filterCategoriesCopy);
+		} else {
+			setFilterCategories([...filterCategories, category]);
+		}
+	};
+
+	const categoryMatch = (jokeCategories) => {
+		for (let i = 0; i < jokeCategories.length; i++) {
+			if (filterCategories.includes(jokeCategories[i])) return true;
+		}
+		return false;
+	};
+
 	return (
 		<div className="App">
 			<CssBaseline />
@@ -106,23 +130,53 @@ function App() {
 				<AppBar position="sticky" style={{ marginBottom: 20 }}>
 					<Tabs value={currentTab} onChange={changeTab} centered>
 						<Tab label="Home" id="home-tab" aria-controls="home-panel" />
-						<Tab label="Likes" id="like-tab" aria-controls="like-panel" />
+						<Tab
+							label={
+								<Badge
+									color="secondary"
+									badgeContent={likedJokes.length ? likedJokes.length : null}
+								>
+									Likes
+								</Badge>
+							}
+							id="like-tab"
+							aria-controls="like-panel"
+						/>
 					</Tabs>
 				</AppBar>
 
 				<div role="tabpanel" hidden={currentTab !== 0}>
 					{/* Category filters */}
+					{categories.map((category) => (
+						<FormControlLabel
+							key={category}
+							label={category}
+							control={
+								<Checkbox
+									name={category}
+									color="primary"
+									onChange={togleCategory}
+									checked={filterCategories.includes(category)}
+								/>
+							}
+						/>
+					))}
 					{/* Jokes Cards */}
 					{jokesToShow.map((joke, index) => {
-						return (
-							<JokeCard
-								joke={joke}
-								key={joke.id}
-								likeJoke={likeJoke}
-								unlikeJoke={unlikeJoke}
-								index={index}
-							/>
-						);
+						if (
+							joke.categories.length === 0 ||
+							categoryMatch(joke.categories)
+						) {
+							return (
+								<JokeCard
+									joke={joke}
+									key={joke.id}
+									likeJoke={likeJoke}
+									unlikeJoke={unlikeJoke}
+									index={index}
+								/>
+							);
+						}
 					})}
 					{loading && <Spinner />}
 				</div>
